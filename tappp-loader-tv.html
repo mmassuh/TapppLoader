@@ -24,11 +24,14 @@ body {
 }
 .ver { display:none; }
 .ver.on { display:block; }
+@keyframes breathe { 0%,100%{opacity:.3} 50%{opacity:.8} }
 .label {
   display:block; margin-top:20px;
   color:#505878; font-size:14px; letter-spacing:.14em;
-  text-transform:uppercase; font-weight:500;
+  text-transform:uppercase; font-weight:600;
   font-family:Arial,Helvetica,sans-serif;
+  -webkit-animation:breathe 3s ease-in-out infinite;
+  animation:breathe 3s ease-in-out infinite;
 }
 .label.hidden { display:none; }
 .switchers { margin-top:44px; text-align:center; }

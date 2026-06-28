@@ -74,38 +74,40 @@ body {
 .ma2 { fill:none; stroke:#0d0f1a; stroke-width:2.03; stroke-dasharray:19.7; stroke-dashoffset:19.7; }
 .ma3 { fill:none; stroke:#0d0f1a; stroke-width:4.17; stroke-dasharray:13.1; stroke-dashoffset:13.1; }
 
-/* Fill: C1 fills 0→16.67%, holds until 66.67%, jumps empty */
+/* Fill: C1 — jumps empty at 66.5% (mask is 99.97% covering at that point) */
 @-webkit-keyframes f1 {
   0%{stroke-dashoffset:23.8}
-  16.67%,66.67%{stroke-dashoffset:0}
-  66.68%,100%{stroke-dashoffset:23.8}
+  16.67%,66.49%{stroke-dashoffset:0}
+  66.5%,100%{stroke-dashoffset:23.8}
 }
 @keyframes f1 {
   0%{stroke-dashoffset:23.8}
-  16.67%,66.67%{stroke-dashoffset:0}
-  66.68%,100%{stroke-dashoffset:23.8}
+  16.67%,66.49%{stroke-dashoffset:0}
+  66.5%,100%{stroke-dashoffset:23.8}
 }
-/* Fill: C2 fills 16.67→33.33%, holds until 83.33%, jumps empty */
+/* Fill: C2 — jumps empty at 83.16% (mask ≥99.97% covering) */
 @-webkit-keyframes f2 {
   0%,16.67%{stroke-dashoffset:19.7}
-  33.33%,83.33%{stroke-dashoffset:0}
-  83.34%,100%{stroke-dashoffset:19.7}
+  33.33%,83.15%{stroke-dashoffset:0}
+  83.16%,100%{stroke-dashoffset:19.7}
 }
 @keyframes f2 {
   0%,16.67%{stroke-dashoffset:19.7}
-  33.33%,83.33%{stroke-dashoffset:0}
-  83.34%,100%{stroke-dashoffset:19.7}
+  33.33%,83.15%{stroke-dashoffset:0}
+  83.16%,100%{stroke-dashoffset:19.7}
 }
-/* Fill: C3 fills 33.33→50%, holds through 100%, jumps at cycle boundary */
+/* Fill: C3 — jumps empty at 99.83%, well before mask retracts at cycle boundary */
 @-webkit-keyframes f3 {
   0%,33.33%{stroke-dashoffset:13.1}
-  50%,100%{stroke-dashoffset:0}
+  50%,99.82%{stroke-dashoffset:0}
+  99.83%{stroke-dashoffset:13.1}
 }
 @keyframes f3 {
   0%,33.33%{stroke-dashoffset:13.1}
-  50%,100%{stroke-dashoffset:0}
+  50%,99.82%{stroke-dashoffset:0}
+  99.83%{stroke-dashoffset:13.1}
 }
-/* Mask: covers C1 clockwise during erase phase 50→66.67%, then resets */
+/* Mask: covers C1 clockwise 50→66.67%, resets after fill has already jumped */
 @-webkit-keyframes m1 {
   0%,50%{stroke-dashoffset:23.8}
   66.67%{stroke-dashoffset:0}
@@ -127,7 +129,7 @@ body {
   83.33%{stroke-dashoffset:0}
   83.34%,100%{stroke-dashoffset:19.7}
 }
-/* Mask: covers C3 during 83.33→100%, both reset at cycle boundary */
+/* Mask: covers C3 during 83.33→100%, retracts at cycle boundary (fill already empty) */
 @-webkit-keyframes m3 {
   0%,83.33%{stroke-dashoffset:13.1}
   100%{stroke-dashoffset:0}

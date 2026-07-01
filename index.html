@@ -1,0 +1,436 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>TAPPP — Loader Concepts</title>
+<style>
+* { -webkit-box-sizing:border-box; box-sizing:border-box; margin:0; padding:0; }
+html, body { width:100%; height:100%; background:#0d0f1a; }
+body {
+  display:-webkit-box; display:-webkit-flex; display:flex;
+  -webkit-box-orient:vertical; -webkit-box-direction:normal;
+  -webkit-flex-direction:column; flex-direction:column;
+  -webkit-box-align:center; -webkit-align-items:center; align-items:center;
+  -webkit-box-pack:center; -webkit-justify-content:center; justify-content:center;
+  min-height:100%;
+}
+.loader-wrap {
+  display:-webkit-box; display:-webkit-flex; display:flex;
+  -webkit-box-orient:vertical; -webkit-box-direction:normal;
+  -webkit-flex-direction:column; flex-direction:column;
+  -webkit-box-align:center; -webkit-align-items:center; align-items:center;
+}
+.ver { display:none; }
+.ver.on { display:block; }
+@-webkit-keyframes breathe { 0%,100%{opacity:.3} 50%{opacity:.8} }
+@keyframes breathe { 0%,100%{opacity:.3} 50%{opacity:.8} }
+.label {
+  display:block; margin-top:28px;
+  color:#505878; font-size:11px; letter-spacing:.14em;
+  text-transform:uppercase; font-weight:600;
+  font-family:Arial,Helvetica,sans-serif;
+  -webkit-animation:breathe 3s ease-in-out infinite;
+  animation:breathe 3s ease-in-out infinite;
+}
+.label.hidden { display:none; }
+.switchers { margin-top:52px; text-align:center; }
+.group { margin-bottom:14px; }
+.sel-label {
+  color:#404666; font-size:10px; letter-spacing:.1em;
+  text-transform:uppercase; font-family:Arial,sans-serif;
+  margin-bottom:8px;
+}
+.btn {
+  display:inline-block; margin:0 4px;
+  padding:7px 18px; background:transparent;
+  border:1px solid #272c47; border-radius:8px;
+  color:#505878; font-size:12px;
+  font-family:Arial,Helvetica,sans-serif;
+  letter-spacing:.04em; cursor:pointer;
+}
+.btn.on { border-color:#5468ff; color:#6b7fff; }
+.label-row {
+  display:-webkit-box; display:-webkit-flex; display:flex;
+  -webkit-box-align:center; -webkit-align-items:center; align-items:center;
+  -webkit-box-pack:center; -webkit-justify-content:center; justify-content:center;
+  gap:8px;
+}
+.label-input {
+  background:transparent; border:1px solid #272c47; border-radius:8px;
+  color:#6b7fff; font-size:12px; font-family:Arial,Helvetica,sans-serif;
+  letter-spacing:.04em; padding:7px 14px; width:160px; outline:none;
+  text-transform:uppercase; text-align:center;
+}
+.label-input:focus { border-color:#5468ff; }
+
+/* ── MODERN: stroke-dashoffset CSS animation ─────────────────────────────
+   C1: circ=23.8  fill 0→16.67%    hold→50%    erase 50→66.67%   hold→100%
+   C2: circ=19.7  fill 16.67→33.33% hold→66.67% erase 66.67→83.33% hold→100%
+   C3: circ=13.1  fill 33.33→50%   hold→83.33% erase 83.33→100%
+   Negative dashoffset on erase → stroke retreats from tail, invisible reset at cycle boundary.
+*/
+@-webkit-keyframes f1 {
+  0%     { stroke-dashoffset:23.8;  -webkit-animation-timing-function:ease-in-out; }
+  16.67% { stroke-dashoffset:0;     -webkit-animation-timing-function:linear; }
+  50%    { stroke-dashoffset:0;     -webkit-animation-timing-function:ease-in-out; }
+  66.67% { stroke-dashoffset:-23.8; -webkit-animation-timing-function:linear; }
+  66.68% { stroke-dashoffset:23.8;  -webkit-animation-timing-function:linear; }
+  100%   { stroke-dashoffset:23.8; }
+}
+@keyframes f1 {
+  0%     { stroke-dashoffset:23.8;  animation-timing-function:ease-in-out; }
+  16.67% { stroke-dashoffset:0;     animation-timing-function:linear; }
+  50%    { stroke-dashoffset:0;     animation-timing-function:ease-in-out; }
+  66.67% { stroke-dashoffset:-23.8; animation-timing-function:linear; }
+  66.68% { stroke-dashoffset:23.8;  animation-timing-function:linear; }
+  100%   { stroke-dashoffset:23.8; }
+}
+@-webkit-keyframes f2 {
+  0%     { stroke-dashoffset:19.7;  -webkit-animation-timing-function:linear; }
+  16.67% { stroke-dashoffset:19.7;  -webkit-animation-timing-function:ease-in-out; }
+  33.33% { stroke-dashoffset:0;     -webkit-animation-timing-function:linear; }
+  66.67% { stroke-dashoffset:0;     -webkit-animation-timing-function:ease-in-out; }
+  83.33% { stroke-dashoffset:-19.7; -webkit-animation-timing-function:linear; }
+  83.34% { stroke-dashoffset:19.7;  -webkit-animation-timing-function:linear; }
+  100%   { stroke-dashoffset:19.7; }
+}
+@keyframes f2 {
+  0%     { stroke-dashoffset:19.7;  animation-timing-function:linear; }
+  16.67% { stroke-dashoffset:19.7;  animation-timing-function:ease-in-out; }
+  33.33% { stroke-dashoffset:0;     animation-timing-function:linear; }
+  66.67% { stroke-dashoffset:0;     animation-timing-function:ease-in-out; }
+  83.33% { stroke-dashoffset:-19.7; animation-timing-function:linear; }
+  83.34% { stroke-dashoffset:19.7;  animation-timing-function:linear; }
+  100%   { stroke-dashoffset:19.7; }
+}
+@-webkit-keyframes f3 {
+  0%     { stroke-dashoffset:13.1;  -webkit-animation-timing-function:linear; }
+  33.33% { stroke-dashoffset:13.1;  -webkit-animation-timing-function:ease-in-out; }
+  50%    { stroke-dashoffset:0;     -webkit-animation-timing-function:linear; }
+  83.33% { stroke-dashoffset:0;     -webkit-animation-timing-function:ease-in-out; }
+  100%   { stroke-dashoffset:-13.1; }
+}
+@keyframes f3 {
+  0%     { stroke-dashoffset:13.1;  animation-timing-function:linear; }
+  33.33% { stroke-dashoffset:13.1;  animation-timing-function:ease-in-out; }
+  50%    { stroke-dashoffset:0;     animation-timing-function:linear; }
+  83.33% { stroke-dashoffset:0;     animation-timing-function:ease-in-out; }
+  100%   { stroke-dashoffset:-13.1; }
+}
+.af1 { -webkit-animation:f1 4.2s linear infinite; animation:f1 4.2s linear infinite; }
+.af2 { -webkit-animation:f2 4.2s linear infinite; animation:f2 4.2s linear infinite; }
+.af3 { -webkit-animation:f3 4.2s linear infinite; animation:f3 4.2s linear infinite; }
+
+/* ── NO GPU: pure opacity, compositor-only ───────────────────────────────── */
+@-webkit-keyframes o1 {
+  0%     { opacity:0; -webkit-animation-timing-function:ease-in-out; }
+  16.67% { opacity:1; -webkit-animation-timing-function:linear; }
+  50%    { opacity:1; -webkit-animation-timing-function:ease-in-out; }
+  66.67% { opacity:0; -webkit-animation-timing-function:linear; }
+  100%   { opacity:0; }
+}
+@keyframes o1 {
+  0%     { opacity:0; animation-timing-function:ease-in-out; }
+  16.67% { opacity:1; animation-timing-function:linear; }
+  50%    { opacity:1; animation-timing-function:ease-in-out; }
+  66.67% { opacity:0; animation-timing-function:linear; }
+  100%   { opacity:0; }
+}
+@-webkit-keyframes o2 {
+  0%     { opacity:0; -webkit-animation-timing-function:linear; }
+  16.67% { opacity:0; -webkit-animation-timing-function:ease-in-out; }
+  33.33% { opacity:1; -webkit-animation-timing-function:linear; }
+  66.67% { opacity:1; -webkit-animation-timing-function:ease-in-out; }
+  83.33% { opacity:0; -webkit-animation-timing-function:linear; }
+  100%   { opacity:0; }
+}
+@keyframes o2 {
+  0%     { opacity:0; animation-timing-function:linear; }
+  16.67% { opacity:0; animation-timing-function:ease-in-out; }
+  33.33% { opacity:1; animation-timing-function:linear; }
+  66.67% { opacity:1; animation-timing-function:ease-in-out; }
+  83.33% { opacity:0; animation-timing-function:linear; }
+  100%   { opacity:0; }
+}
+@-webkit-keyframes o3 {
+  0%     { opacity:0; -webkit-animation-timing-function:linear; }
+  33.33% { opacity:0; -webkit-animation-timing-function:ease-in-out; }
+  50%    { opacity:1; -webkit-animation-timing-function:linear; }
+  83.33% { opacity:1; -webkit-animation-timing-function:ease-in-out; }
+  100%   { opacity:0; }
+}
+@keyframes o3 {
+  0%     { opacity:0; animation-timing-function:linear; }
+  33.33% { opacity:0; animation-timing-function:ease-in-out; }
+  50%    { opacity:1; animation-timing-function:linear; }
+  83.33% { opacity:1; animation-timing-function:ease-in-out; }
+  100%   { opacity:0; }
+}
+.ao1 { -webkit-animation:o1 4.2s linear infinite; animation:o1 4.2s linear infinite; }
+.ao2 { -webkit-animation:o2 4.2s linear infinite; animation:o2 4.2s linear infinite; }
+.ao3 { -webkit-animation:o3 4.2s linear infinite; animation:o3 4.2s linear infinite; }
+</style>
+</head>
+<body>
+
+<!-- ════ ISOTIPO — MODERN ════ -->
+<div id="ver-isotipo-modern" class="ver">
+  <div class="loader-wrap">
+    <svg width="320" height="65" viewBox="34 0 44 9" fill="none" xmlns="http://www.w3.org/2000/svg">
+      <g transform="rotate(-90,39.4915,4.154)">
+        <circle class="af1" fill="none" stroke="white" stroke-width="0.62" stroke-dasharray="23.8" stroke-dashoffset="23.8" cx="39.4915" cy="4.154" r="3.788"/>
+      </g>
+      <circle fill="none" stroke="white" stroke-opacity="0.15" stroke-width="0.62" cx="39.4915" cy="4.154" r="3.788"/>
+      <g transform="rotate(-90,56.4392,4.154)">
+        <circle class="af2" fill="none" stroke="white" stroke-width="2.03" stroke-dasharray="19.7" stroke-dashoffset="19.7" cx="56.4392" cy="4.154" r="3.14"/>
+      </g>
+      <circle fill="none" stroke="white" stroke-opacity="0.15" stroke-width="2.03" cx="56.4392" cy="4.154" r="3.14"/>
+      <g transform="rotate(-90,73.1013,4.154)">
+        <circle class="af3" fill="none" stroke="white" stroke-width="4.17" stroke-dasharray="13.1" stroke-dashoffset="13.1" cx="73.1013" cy="4.154" r="2.085"/>
+      </g>
+      <circle fill="white" fill-opacity="0.15" cx="73.1013" cy="4.154" r="4.17"/>
+    </svg>
+    <span class="label">loading</span>
+  </div>
+</div>
+
+<!-- ════ ISOTIPO — TV ════ -->
+<div id="ver-isotipo-tv" class="ver">
+  <div class="loader-wrap">
+    <svg width="320" height="65" viewBox="34 0 44 9" fill="none" xmlns="http://www.w3.org/2000/svg">
+      <g transform="rotate(-90,39.4915,4.154)">
+        <circle fill="none" stroke="white" stroke-width="0.62" stroke-dasharray="23.8" stroke-dashoffset="23.8" cx="39.4915" cy="4.154" r="3.788">
+          <animate attributeName="stroke-dashoffset" calcMode="spline"
+            values="23.8;0;0;23.8;23.8" keyTimes="0;0.1667;0.6667;0.6668;1"
+            keySplines="0.42 0 0.58 1;0 0 1 1;0 0 1 1;0 0 1 1" dur="4.2s" repeatCount="indefinite"/>
+        </circle>
+        <circle fill="none" stroke="#0d0f1a" stroke-width="0.62" stroke-dasharray="23.8" stroke-dashoffset="23.8" cx="39.4915" cy="4.154" r="3.788">
+          <animate attributeName="stroke-dashoffset" calcMode="spline"
+            values="23.8;23.8;0;23.8;23.8" keyTimes="0;0.5;0.6667;0.6668;1"
+            keySplines="0 0 1 1;0.42 0 0.58 1;0 0 1 1;0 0 1 1" dur="4.2s" repeatCount="indefinite"/>
+        </circle>
+      </g>
+      <g transform="rotate(-90,56.4392,4.154)">
+        <circle fill="none" stroke="white" stroke-width="2.03" stroke-dasharray="19.7" stroke-dashoffset="19.7" cx="56.4392" cy="4.154" r="3.14">
+          <animate attributeName="stroke-dashoffset" calcMode="spline"
+            values="19.7;19.7;0;0;19.7;19.7" keyTimes="0;0.1667;0.3333;0.8333;0.8334;1"
+            keySplines="0 0 1 1;0.42 0 0.58 1;0 0 1 1;0 0 1 1;0 0 1 1" dur="4.2s" repeatCount="indefinite"/>
+        </circle>
+        <circle fill="none" stroke="#0d0f1a" stroke-width="2.03" stroke-dasharray="19.7" stroke-dashoffset="19.7" cx="56.4392" cy="4.154" r="3.14">
+          <animate attributeName="stroke-dashoffset" calcMode="spline"
+            values="19.7;19.7;0;19.7;19.7" keyTimes="0;0.6667;0.8333;0.8334;1"
+            keySplines="0 0 1 1;0.42 0 0.58 1;0 0 1 1;0 0 1 1" dur="4.2s" repeatCount="indefinite"/>
+        </circle>
+      </g>
+      <g transform="rotate(-90,73.1013,4.154)">
+        <circle fill="none" stroke="white" stroke-width="4.17" stroke-dasharray="13.1" stroke-dashoffset="13.1" cx="73.1013" cy="4.154" r="2.085">
+          <animate attributeName="stroke-dashoffset" calcMode="spline"
+            values="13.1;13.1;0;0" keyTimes="0;0.3333;0.5;1"
+            keySplines="0 0 1 1;0.42 0 0.58 1;0 0 1 1" dur="4.2s" repeatCount="indefinite"/>
+        </circle>
+        <circle fill="none" stroke="#0d0f1a" stroke-width="4.17" stroke-dasharray="13.1" stroke-dashoffset="13.1" cx="73.1013" cy="4.154" r="2.085">
+          <animate attributeName="stroke-dashoffset" calcMode="spline"
+            values="13.1;13.1;0" keyTimes="0;0.8333;1"
+            keySplines="0 0 1 1;0.42 0 0.58 1" dur="4.2s" repeatCount="indefinite"/>
+        </circle>
+      </g>
+      <circle fill="none" stroke="white" stroke-opacity="0.15" stroke-width="0.62" cx="39.4915" cy="4.154" r="3.788"/>
+      <circle fill="none" stroke="white" stroke-opacity="0.15" stroke-width="2.03" cx="56.4392" cy="4.154" r="3.14"/>
+      <circle fill="white" fill-opacity="0.15" cx="73.1013" cy="4.154" r="4.17"/>
+    </svg>
+    <span class="label">loading</span>
+  </div>
+</div>
+
+<!-- ════ ISOLOGO — MODERN ════ -->
+<div id="ver-isologo-modern" class="ver on">
+  <div class="loader-wrap">
+    <svg width="390" height="120" viewBox="0 0 78 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+      <path d="M6.5018 23.9848H3.01062V16.8598H0V13.8887H9.52655V16.8598H6.5018V23.9848Z" fill="white"/>
+      <path d="M19.1653 23.9859H15.5469L19.8296 13.832H23.0522L27.3349 23.9859H23.7165L23.3349 22.8753H19.5469L19.1653 23.9859ZM20.5504 20.1205H22.3455L21.455 17.5388L20.5504 20.1205Z" fill="white"/>
+      <path d="M39.4613 13.7891C40.9878 13.7891 42.1609 14.1352 42.9666 14.8275C43.7722 15.5198 44.1821 16.5439 44.1821 17.9141C44.1821 19.2121 43.7722 20.2073 42.9666 20.8852C42.1609 21.5631 40.9878 21.9237 39.4613 21.9237H38.5708V24.0006H35.0938V13.9044C35.546 13.89 35.9559 13.8756 36.3234 13.8612L37.3976 13.8179C37.751 13.8035 38.0902 13.8035 38.4295 13.7891H39.4613ZM39.4471 19.0391C39.7642 19.0572 40.0766 18.9544 40.3235 18.7506C40.5355 18.5631 40.6344 18.2746 40.6344 17.9141C40.6344 17.4669 40.5355 17.1496 40.3235 16.9477C40.0817 16.7331 39.7669 16.6243 39.4471 16.6448H38.5708V19.0535H39.4471V19.0391Z" fill="white"/>
+      <path d="M56.2972 13.7891C57.8237 13.7891 58.9969 14.1352 59.8025 14.8275C60.6082 15.5198 61.0181 16.5439 61.0181 17.9141C61.0181 19.2121 60.6082 20.2073 59.8025 20.8852C58.9969 21.5631 57.8237 21.9237 56.2972 21.9237H55.4067V24.0006H51.9297V13.9044C52.382 13.89 52.7919 13.8756 53.1594 13.8612L54.2336 13.8179C54.5869 13.8035 54.9262 13.8035 55.2654 13.7891H56.2972ZM56.2689 19.0391C56.586 19.0572 56.8984 18.9544 57.1453 18.7506C57.3573 18.5631 57.4562 18.2746 57.4562 17.9141C57.4562 17.4669 57.3573 17.1496 57.1453 16.9477C56.9035 16.7331 56.5887 16.6243 56.2689 16.6448H55.3926V19.0535H56.2689V19.0391Z" fill="white"/>
+      <path d="M73.1175 13.7891C74.644 13.7891 75.8172 14.1352 76.6228 14.8275C77.4285 15.5198 77.8384 16.5439 77.8384 17.9141C77.8384 19.2121 77.4285 20.2073 76.6228 20.8852C75.8172 21.5631 74.644 21.9237 73.1175 21.9237H72.227V24.0006H68.75V13.9044C69.2023 13.89 69.6122 13.8756 69.9797 13.8612L71.0539 13.8179C71.4073 13.8035 71.7465 13.8035 72.0857 13.7891H73.1175ZM73.1034 19.0391C73.4205 19.0572 73.7328 18.9544 73.9797 18.7506C74.1917 18.5631 74.2907 18.2746 74.2907 17.9141C74.2907 17.4669 74.1917 17.1496 73.9797 16.9477C73.738 16.7331 73.4232 16.6243 73.1034 16.6448H72.227V19.0535H73.1034V19.0391Z" fill="white"/>
+      <g transform="rotate(-90,39.4915,4.154)">
+        <circle class="af1" fill="none" stroke="white" stroke-width="0.62" stroke-dasharray="23.8" stroke-dashoffset="23.8" cx="39.4915" cy="4.154" r="3.788"/>
+      </g>
+      <circle fill="none" stroke="white" stroke-opacity="0.15" stroke-width="0.62" cx="39.4915" cy="4.154" r="3.788"/>
+      <g transform="rotate(-90,56.4392,4.154)">
+        <circle class="af2" fill="none" stroke="white" stroke-width="2.03" stroke-dasharray="19.7" stroke-dashoffset="19.7" cx="56.4392" cy="4.154" r="3.14"/>
+      </g>
+      <circle fill="none" stroke="white" stroke-opacity="0.15" stroke-width="2.03" cx="56.4392" cy="4.154" r="3.14"/>
+      <g transform="rotate(-90,73.1013,4.154)">
+        <circle class="af3" fill="none" stroke="white" stroke-width="4.17" stroke-dasharray="13.1" stroke-dashoffset="13.1" cx="73.1013" cy="4.154" r="2.085"/>
+      </g>
+      <circle fill="white" fill-opacity="0.15" cx="73.1013" cy="4.154" r="4.17"/>
+    </svg>
+    <span class="label">loading</span>
+  </div>
+</div>
+
+<!-- ════ ISOLOGO — TV ════ -->
+<div id="ver-isologo-tv" class="ver">
+  <div class="loader-wrap">
+    <svg width="390" height="120" viewBox="0 0 78 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+      <path d="M6.5018 23.9848H3.01062V16.8598H0V13.8887H9.52655V16.8598H6.5018V23.9848Z" fill="white"/>
+      <path d="M19.1653 23.9859H15.5469L19.8296 13.832H23.0522L27.3349 23.9859H23.7165L23.3349 22.8753H19.5469L19.1653 23.9859ZM20.5504 20.1205H22.3455L21.455 17.5388L20.5504 20.1205Z" fill="white"/>
+      <path d="M39.4613 13.7891C40.9878 13.7891 42.1609 14.1352 42.9666 14.8275C43.7722 15.5198 44.1821 16.5439 44.1821 17.9141C44.1821 19.2121 43.7722 20.2073 42.9666 20.8852C42.1609 21.5631 40.9878 21.9237 39.4613 21.9237H38.5708V24.0006H35.0938V13.9044C35.546 13.89 35.9559 13.8756 36.3234 13.8612L37.3976 13.8179C37.751 13.8035 38.0902 13.8035 38.4295 13.7891H39.4613ZM39.4471 19.0391C39.7642 19.0572 40.0766 18.9544 40.3235 18.7506C40.5355 18.5631 40.6344 18.2746 40.6344 17.9141C40.6344 17.4669 40.5355 17.1496 40.3235 16.9477C40.0817 16.7331 39.7669 16.6243 39.4471 16.6448H38.5708V19.0535H39.4471V19.0391Z" fill="white"/>
+      <path d="M56.2972 13.7891C57.8237 13.7891 58.9969 14.1352 59.8025 14.8275C60.6082 15.5198 61.0181 16.5439 61.0181 17.9141C61.0181 19.2121 60.6082 20.2073 59.8025 20.8852C58.9969 21.5631 57.8237 21.9237 56.2972 21.9237H55.4067V24.0006H51.9297V13.9044C52.382 13.89 52.7919 13.8756 53.1594 13.8612L54.2336 13.8179C54.5869 13.8035 54.9262 13.8035 55.2654 13.7891H56.2972ZM56.2689 19.0391C56.586 19.0572 56.8984 18.9544 57.1453 18.7506C57.3573 18.5631 57.4562 18.2746 57.4562 17.9141C57.4562 17.4669 57.3573 17.1496 57.1453 16.9477C56.9035 16.7331 56.5887 16.6243 56.2689 16.6448H55.3926V19.0535H56.2689V19.0391Z" fill="white"/>
+      <path d="M73.1175 13.7891C74.644 13.7891 75.8172 14.1352 76.6228 14.8275C77.4285 15.5198 77.8384 16.5439 77.8384 17.9141C77.8384 19.2121 77.4285 20.2073 76.6228 20.8852C75.8172 21.5631 74.644 21.9237 73.1175 21.9237H72.227V24.0006H68.75V13.9044C69.2023 13.89 69.6122 13.8756 69.9797 13.8612L71.0539 13.8179C71.4073 13.8035 71.7465 13.8035 72.0857 13.7891H73.1175ZM73.1034 19.0391C73.4205 19.0572 73.7328 18.9544 73.9797 18.7506C74.1917 18.5631 74.2907 18.2746 74.2907 17.9141C74.2907 17.4669 74.1917 17.1496 73.9797 16.9477C73.738 16.7331 73.4232 16.6243 73.1034 16.6448H72.227V19.0535H73.1034V19.0391Z" fill="white"/>
+      <g transform="rotate(-90,39.4915,4.154)">
+        <circle fill="none" stroke="white" stroke-width="0.62" stroke-dasharray="23.8" stroke-dashoffset="23.8" cx="39.4915" cy="4.154" r="3.788">
+          <animate attributeName="stroke-dashoffset" calcMode="spline"
+            values="23.8;0;0;23.8;23.8" keyTimes="0;0.1667;0.6667;0.6668;1"
+            keySplines="0.42 0 0.58 1;0 0 1 1;0 0 1 1;0 0 1 1" dur="4.2s" repeatCount="indefinite"/>
+        </circle>
+        <circle fill="none" stroke="#0d0f1a" stroke-width="0.62" stroke-dasharray="23.8" stroke-dashoffset="23.8" cx="39.4915" cy="4.154" r="3.788">
+          <animate attributeName="stroke-dashoffset" calcMode="spline"
+            values="23.8;23.8;0;23.8;23.8" keyTimes="0;0.5;0.6667;0.6668;1"
+            keySplines="0 0 1 1;0.42 0 0.58 1;0 0 1 1;0 0 1 1" dur="4.2s" repeatCount="indefinite"/>
+        </circle>
+      </g>
+      <g transform="rotate(-90,56.4392,4.154)">
+        <circle fill="none" stroke="white" stroke-width="2.03" stroke-dasharray="19.7" stroke-dashoffset="19.7" cx="56.4392" cy="4.154" r="3.14">
+          <animate attributeName="stroke-dashoffset" calcMode="spline"
+            values="19.7;19.7;0;0;19.7;19.7" keyTimes="0;0.1667;0.3333;0.8333;0.8334;1"
+            keySplines="0 0 1 1;0.42 0 0.58 1;0 0 1 1;0 0 1 1;0 0 1 1" dur="4.2s" repeatCount="indefinite"/>
+        </circle>
+        <circle fill="none" stroke="#0d0f1a" stroke-width="2.03" stroke-dasharray="19.7" stroke-dashoffset="19.7" cx="56.4392" cy="4.154" r="3.14">
+          <animate attributeName="stroke-dashoffset" calcMode="spline"
+            values="19.7;19.7;0;19.7;19.7" keyTimes="0;0.6667;0.8333;0.8334;1"
+            keySplines="0 0 1 1;0.42 0 0.58 1;0 0 1 1;0 0 1 1" dur="4.2s" repeatCount="indefinite"/>
+        </circle>
+      </g>
+      <g transform="rotate(-90,73.1013,4.154)">
+        <circle fill="none" stroke="white" stroke-width="4.17" stroke-dasharray="13.1" stroke-dashoffset="13.1" cx="73.1013" cy="4.154" r="2.085">
+          <animate attributeName="stroke-dashoffset" calcMode="spline"
+            values="13.1;13.1;0;0" keyTimes="0;0.3333;0.5;1"
+            keySplines="0 0 1 1;0.42 0 0.58 1;0 0 1 1" dur="4.2s" repeatCount="indefinite"/>
+        </circle>
+        <circle fill="none" stroke="#0d0f1a" stroke-width="4.17" stroke-dasharray="13.1" stroke-dashoffset="13.1" cx="73.1013" cy="4.154" r="2.085">
+          <animate attributeName="stroke-dashoffset" calcMode="spline"
+            values="13.1;13.1;0" keyTimes="0;0.8333;1"
+            keySplines="0 0 1 1;0.42 0 0.58 1" dur="4.2s" repeatCount="indefinite"/>
+        </circle>
+      </g>
+      <circle fill="none" stroke="white" stroke-opacity="0.15" stroke-width="0.62" cx="39.4915" cy="4.154" r="3.788"/>
+      <circle fill="none" stroke="white" stroke-opacity="0.15" stroke-width="2.03" cx="56.4392" cy="4.154" r="3.14"/>
+      <circle fill="white" fill-opacity="0.15" cx="73.1013" cy="4.154" r="4.17"/>
+    </svg>
+    <span class="label">loading</span>
+  </div>
+</div>
+
+<!-- ════ ISOTIPO — NO GPU ════ -->
+<div id="ver-isotipo-nogpu" class="ver">
+  <div class="loader-wrap">
+    <svg width="320" height="65" viewBox="34 0 44 9" fill="none" xmlns="http://www.w3.org/2000/svg">
+      <circle class="ao1" fill="none" stroke="white" stroke-width="0.62" cx="39.4915" cy="4.154" r="3.788"/>
+      <circle fill="none" stroke="white" stroke-opacity="0.15" stroke-width="0.62" cx="39.4915" cy="4.154" r="3.788"/>
+      <circle class="ao2" fill="none" stroke="white" stroke-width="2.03" cx="56.4392" cy="4.154" r="3.14"/>
+      <circle fill="none" stroke="white" stroke-opacity="0.15" stroke-width="2.03" cx="56.4392" cy="4.154" r="3.14"/>
+      <circle class="ao3" fill="white" cx="73.1013" cy="4.154" r="4.17"/>
+      <circle fill="white" fill-opacity="0.15" cx="73.1013" cy="4.154" r="4.17"/>
+    </svg>
+    <span class="label">loading</span>
+  </div>
+</div>
+
+<!-- ════ ISOLOGO — NO GPU ════ -->
+<div id="ver-isologo-nogpu" class="ver">
+  <div class="loader-wrap">
+    <svg width="390" height="120" viewBox="0 0 78 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+      <path d="M6.5018 23.9848H3.01062V16.8598H0V13.8887H9.52655V16.8598H6.5018V23.9848Z" fill="white"/>
+      <path d="M19.1653 23.9859H15.5469L19.8296 13.832H23.0522L27.3349 23.9859H23.7165L23.3349 22.8753H19.5469L19.1653 23.9859ZM20.5504 20.1205H22.3455L21.455 17.5388L20.5504 20.1205Z" fill="white"/>
+      <path d="M39.4613 13.7891C40.9878 13.7891 42.1609 14.1352 42.9666 14.8275C43.7722 15.5198 44.1821 16.5439 44.1821 17.9141C44.1821 19.2121 43.7722 20.2073 42.9666 20.8852C42.1609 21.5631 40.9878 21.9237 39.4613 21.9237H38.5708V24.0006H35.0938V13.9044C35.546 13.89 35.9559 13.8756 36.3234 13.8612L37.3976 13.8179C37.751 13.8035 38.0902 13.8035 38.4295 13.7891H39.4613ZM39.4471 19.0391C39.7642 19.0572 40.0766 18.9544 40.3235 18.7506C40.5355 18.5631 40.6344 18.2746 40.6344 17.9141C40.6344 17.4669 40.5355 17.1496 40.3235 16.9477C40.0817 16.7331 39.7669 16.6243 39.4471 16.6448H38.5708V19.0535H39.4471V19.0391Z" fill="white"/>
+      <path d="M56.2972 13.7891C57.8237 13.7891 58.9969 14.1352 59.8025 14.8275C60.6082 15.5198 61.0181 16.5439 61.0181 17.9141C61.0181 19.2121 60.6082 20.2073 59.8025 20.8852C58.9969 21.5631 57.8237 21.9237 56.2972 21.9237H55.4067V24.0006H51.9297V13.9044C52.382 13.89 52.7919 13.8756 53.1594 13.8612L54.2336 13.8179C54.5869 13.8035 54.9262 13.8035 55.2654 13.7891H56.2972ZM56.2689 19.0391C56.586 19.0572 56.8984 18.9544 57.1453 18.7506C57.3573 18.5631 57.4562 18.2746 57.4562 17.9141C57.4562 17.4669 57.3573 17.1496 57.1453 16.9477C56.9035 16.7331 56.5887 16.6243 56.2689 16.6448H55.3926V19.0535H56.2689V19.0391Z" fill="white"/>
+      <path d="M73.1175 13.7891C74.644 13.7891 75.8172 14.1352 76.6228 14.8275C77.4285 15.5198 77.8384 16.5439 77.8384 17.9141C77.8384 19.2121 77.4285 20.2073 76.6228 20.8852C75.8172 21.5631 74.644 21.9237 73.1175 21.9237H72.227V24.0006H68.75V13.9044C69.2023 13.89 69.6122 13.8756 69.9797 13.8612L71.0539 13.8179C71.4073 13.8035 71.7465 13.8035 72.0857 13.7891H73.1175ZM73.1034 19.0391C73.4205 19.0572 73.7328 18.9544 73.9797 18.7506C74.1917 18.5631 74.2907 18.2746 74.2907 17.9141C74.2907 17.4669 74.1917 17.1496 73.9797 16.9477C73.738 16.7331 73.4232 16.6243 73.1034 16.6448H72.227V19.0535H73.1034V19.0391Z" fill="white"/>
+      <circle class="ao1" fill="none" stroke="white" stroke-width="0.62" cx="39.4915" cy="4.154" r="3.788"/>
+      <circle fill="none" stroke="white" stroke-opacity="0.15" stroke-width="0.62" cx="39.4915" cy="4.154" r="3.788"/>
+      <circle class="ao2" fill="none" stroke="white" stroke-width="2.03" cx="56.4392" cy="4.154" r="3.14"/>
+      <circle fill="none" stroke="white" stroke-opacity="0.15" stroke-width="2.03" cx="56.4392" cy="4.154" r="3.14"/>
+      <circle class="ao3" fill="white" cx="73.1013" cy="4.154" r="4.17"/>
+      <circle fill="white" fill-opacity="0.15" cx="73.1013" cy="4.154" r="4.17"/>
+    </svg>
+    <span class="label">loading</span>
+  </div>
+</div>
+
+<!-- ════ CONTROLS ════ -->
+<div class="switchers">
+  <div class="group">
+    <p class="sel-label">Variant</p>
+    <div class="selector">
+      <button id="btn-v-isotipo"  class="btn"    onclick="setVariant('isotipo')">Isotipo</button>
+      <button id="btn-v-isologo"  class="btn on" onclick="setVariant('isologo')">Isologo</button>
+    </div>
+  </div>
+  <div class="group">
+    <p class="sel-label">Technology</p>
+    <div class="selector">
+      <button id="btn-t-modern" class="btn on" onclick="setTech('modern')">Modern</button>
+      <button id="btn-t-tv"     class="btn"    onclick="setTech('tv')">TV / Old Chromium</button>
+      <button id="btn-t-nogpu"  class="btn"    onclick="setTech('nogpu')">No GPU</button>
+    </div>
+  </div>
+  <div class="group">
+    <p class="sel-label">Label</p>
+    <div class="label-row">
+      <input id="label-input" class="label-input" type="text" value="loading"
+        oninput="setLabelText(this.value)" onchange="setLabelText(this.value)"/>
+      <button id="btn-label-toggle" class="btn on" onclick="toggleLabel()">Visible</button>
+    </div>
+  </div>
+</div>
+
+<script>
+var cv = 'isologo', ct = 'modern', labelVisible = true;
+var variants = ['isotipo','isologo'];
+var techs    = ['modern','tv','nogpu'];
+
+function setVariant(v) { cv = v; render(); }
+function setTech(t)    { ct = t; render(); }
+
+function render() {
+  var i, v, t;
+  for (i = 0; i < variants.length; i++) {
+    v = variants[i];
+    for (var j = 0; j < techs.length; j++) {
+      t = techs[j];
+      document.getElementById('ver-' + v + '-' + t).className = 'ver' + (v === cv && t === ct ? ' on' : '');
+    }
+    document.getElementById('btn-v-' + v).className = 'btn' + (v === cv ? ' on' : '');
+  }
+  for (i = 0; i < techs.length; i++) {
+    t = techs[i];
+    document.getElementById('btn-t-' + t).className = 'btn' + (t === ct ? ' on' : '');
+  }
+}
+
+function setLabelText(val) {
+  var spans = document.getElementsByClassName('label');
+  for (var i = 0; i < spans.length; i++) {
+    if (labelVisible) { spans[i].textContent = val; }
+  }
+}
+
+function toggleLabel() {
+  labelVisible = !labelVisible;
+  var spans = document.getElementsByClassName('label');
+  var input = document.getElementById('label-input');
+  var btn   = document.getElementById('btn-label-toggle');
+  for (var i = 0; i < spans.length; i++) {
+    if (labelVisible) {
+      spans[i].className = 'label';
+      spans[i].textContent = input.value;
+    } else {
+      spans[i].className = 'label hidden';
+    }
+  }
+  btn.className = 'btn' + (labelVisible ? ' on' : '');
+  btn.innerHTML = labelVisible ? 'Visible' : 'Hidden';
+}
+</script>
+</body>
+</html>
